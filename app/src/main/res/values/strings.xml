@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">EscapeLearning</string>
+    <string name="i_am_a_student">I\'m a Student</string>
+    <string name="i_am_a_teacher">I\'m a Teacher</string>
+    <string name="i_am_a_parent">I\'m a Parent</string>
+    <string name="enjoy_learning">Enjoy Learning</string>
+    <string name="create_account">Create Account</string>
+    <string name="i_have_an_account">I have an account</string>
+    <string name="example_text">Example Text</string>
 </resources>
