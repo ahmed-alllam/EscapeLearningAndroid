@@ -34,6 +34,5 @@ public class ChooseRoleActivity extends AppCompatActivity {
 
         intent.putExtra("role", role);
         startActivity(intent);
-        finish();
     }
 }

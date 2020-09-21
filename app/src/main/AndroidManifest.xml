@@ -2,14 +2,24 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.escapelearning.escapelearning">
 
+    <uses-permission android:name="android.permission.INTERNET"/>
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
+        android:usesCleartextTraffic="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".ui.activities.TutorialActivity"></activity>
+        <activity android:name=".ui.activities.ParentHomeActivity"></activity>
+        <activity android:name=".ui.activities.TeacherHomeActivity" />
+        <activity android:name=".ui.activities.StudentHomeActivity" />
+        <activity android:name=".ui.activities.CreateParentActivity" />
+        <activity android:name=".ui.activities.CreateTeacherActivity" />
+        <activity android:name=".ui.activities.CreateStudentActivity" />
+        <activity android:name=".ui.activities.LoginActivity" />
+        <activity android:name=".ui.activities.TutorialActivity" />
         <activity android:name=".ui.activities.ChooseRoleActivity" />
         <activity android:name=".ui.activities.SplashActivity">
             <intent-filter>

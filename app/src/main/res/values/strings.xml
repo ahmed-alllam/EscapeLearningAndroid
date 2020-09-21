@@ -7,4 +7,16 @@
     <string name="create_account">Create Account</string>
     <string name="i_have_an_account">I have an account</string>
     <string name="example_text">Example Text</string>
+    <string name="log_in">Log in</string>
+    <string name="username">Username</string>
+    <string name="password">Password</string>
+    <string name="network_error">No Network Connection</string>
+    <string name="wrong_username_or_password">Wrong Username or Password</string>
+    <string name="username_taken">Username already taken</string>
+    <string name="sign_up">Sign up</string>
+    <string name="name">Name</string>
+    <string name="school_name">School Name</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="Class">Class</string>
+    <string name="school_code">School Code</string>
 </resources>
