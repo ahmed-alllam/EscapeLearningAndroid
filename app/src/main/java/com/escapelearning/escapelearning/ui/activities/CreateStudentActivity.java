@@ -6,11 +6,12 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
-import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -25,14 +26,21 @@ import com.escapelearning.escapelearning.ui.viewmodels.ClassroomViewModel;
 import com.escapelearning.escapelearning.ui.viewmodels.SchoolViewModel;
 import com.escapelearning.escapelearning.ui.viewmodels.StudentViewModel;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
+import retrofit2.HttpException;
+import retrofit2.Response;
 
 public class CreateStudentActivity extends AppCompatActivity {
     private AuthTokenViewModel authTokenViewModel;
     private StudentViewModel studentViewModel;
     private TextView errorLabel;
+    private ProgressBar progressBar;
 
     private String username = "";
     private String password = "";
@@ -44,6 +52,7 @@ public class CreateStudentActivity extends AppCompatActivity {
         setContentView(R.layout.activity_create_student);
 
         errorLabel = findViewById(R.id.errorLabel);
+        progressBar = findViewById(R.id.progressBar);
 
         studentViewModel = new ViewModelProvider(this).get(StudentViewModel.class);
         authTokenViewModel = new ViewModelProvider(this).get(AuthTokenViewModel.class);
@@ -75,12 +84,28 @@ public class CreateStudentActivity extends AppCompatActivity {
             }
         });
 
+        schoolNameEditText.setOnItemClickListener((parent, view, position, id) -> classroomViewModel.searchClassrooms(getApplicationContext(),
+                schoolNameEditText.getText().toString()));
+
         addTextWatcherObservable(schoolNameEditText)
                 .debounce(500, TimeUnit.MILLISECONDS)
-                .subscribe(schoolName -> {
-                    schoolViewModel.searchSchools(getApplicationContext(), schoolName);
-                    classroomViewModel.searchClassrooms(getApplicationContext(), schoolName);
-                });
+                .subscribe(schoolName -> schoolViewModel.searchSchools(getApplicationContext(), schoolName));
+    }
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putString("username", username);
+        outState.putString("password", password);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+
+        username = savedInstanceState.getString("username");
+        password = savedInstanceState.getString("password");
     }
 
     public void onSignupClicked(View view) {
@@ -96,7 +121,7 @@ public class CreateStudentActivity extends AppCompatActivity {
 
             boolean nameValid = isNameValid(name);
             boolean schoolNameValid = isNameValid(schoolName);
-            boolean schoolCodeValid = isNameValid(schoolCode);
+            boolean schoolCodeValid = isSchoolCodeValid(schoolCode);
             boolean classNameValid = isNameValid(className);
             boolean usernameValid = isUsernameValid(username);
             boolean passwordValid = isPasswordValid(password);
@@ -106,19 +131,21 @@ public class CreateStudentActivity extends AppCompatActivity {
                 this.username = username;
                 this.password = password;
 
+                errorLabel.setVisibility(View.INVISIBLE);
+                progressBar.setVisibility(View.VISIBLE);
                 studentViewModel.signup(getApplicationContext(), name, schoolName,
                         schoolCode, className, username, password);
             } else {
                 if (!nameValid)
-                    setErrorMessage(R.string.network_error);
+                    setErrorMessage(R.string.invalid_name);
                 else if (!schoolNameValid || !schoolCodeValid)
-                    setErrorMessage(R.string.network_error);
+                    setErrorMessage(R.string.invalid_school_name);
                 else if (!classNameValid)
-                    setErrorMessage(R.string.network_error);
+                    setErrorMessage(R.string.invalid_class);
                 else if (!usernameValid)
-                    setErrorMessage(R.string.network_error);
+                    setErrorMessage(R.string.invalid_username);
                 else
-                    setErrorMessage(R.string.network_error);
+                    setErrorMessage(R.string.invalid_password);
             }
         } else {
             login();
@@ -128,6 +155,7 @@ public class CreateStudentActivity extends AppCompatActivity {
     public void setErrorMessage(int messageID) {
         errorLabel.setVisibility(View.VISIBLE);
         errorLabel.setText(messageID);
+        progressBar.setVisibility(View.INVISIBLE);
     }
 
     private String getName() {
@@ -164,6 +192,10 @@ public class CreateStudentActivity extends AppCompatActivity {
         return name.length() >= 3;
     }
 
+    private boolean isSchoolCodeValid(String code) {
+        return !code.isEmpty();
+    }
+
     private boolean isUsernameValid(String username) {
         String regexPattern = "[\\w.@+-]{8,}\\Z";
         return username.matches(regexPattern);
@@ -183,8 +215,7 @@ public class CreateStudentActivity extends AppCompatActivity {
                 login();
                 break;
             case BAD_REQUEST:
-                //todo
-                setErrorMessage(R.string.username_taken);
+                parseErrorBody(((HttpException) response.getError()).response());
                 break;
             case NETWORK_FAILED:
                 setErrorMessage(R.string.network_error);
@@ -204,11 +235,30 @@ public class CreateStudentActivity extends AppCompatActivity {
                 finishAffinity();
                 break;
             case NETWORK_FAILED:
+            default:
                 setErrorMessage(R.string.network_error);
         }
     }
 
-    private Observable<String> addTextWatcherObservable(EditText editText) {
+    private void parseErrorBody(@Nullable Response<?> errorResponse) {
+        try {
+            if (errorResponse != null && errorResponse.errorBody() != null) {
+                JSONObject jsonError = new JSONObject(errorResponse.errorBody().string());
+                if (jsonError.has("username"))
+                    setErrorMessage(R.string.username_taken);
+                else if (jsonError.has("non_field_errors"))
+                    setErrorMessage(R.string.invalid_school_name);
+                else
+                    setErrorMessage(R.string.network_error);
+            } else
+                setErrorMessage(R.string.network_error);
+        } catch (IOException | JSONException e) {
+            setErrorMessage(R.string.network_error);
+            e.printStackTrace();
+        }
+    }
+
+    private Observable<String> addTextWatcherObservable(AutoCompleteTextView editText) {
         return Observable.create(emitter -> editText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -217,7 +267,8 @@ public class CreateStudentActivity extends AppCompatActivity {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                emitter.onNext(s.toString());
+                if (!editText.isPerformingCompletion() && !s.toString().trim().isEmpty())
+                    emitter.onNext(s.toString());
             }
 
             @Override

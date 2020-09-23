@@ -2,7 +2,7 @@ package com.escapelearning.escapelearning.data.network;
 
 import com.escapelearning.escapelearning.data.models.AuthToken;
 import com.escapelearning.escapelearning.data.models.Classroom;
-import com.escapelearning.escapelearning.data.models.ResponseList;
+import com.escapelearning.escapelearning.data.models.Parent;
 import com.escapelearning.escapelearning.data.models.School;
 import com.escapelearning.escapelearning.data.models.Student;
 
@@ -33,9 +33,16 @@ public interface APIEndpoints {
     @FormUrlEncoded
     @POST("students/register/")
     Single<Student> signupStudent(@Field("name") String name,
-                                  @Field("school_name") String schoolName,
+                                  @Field("school") String schoolName,
                                   @Field("school_code") String schoolCode,
                                   @Field("classroom") String classRoom,
                                   @Field("username") String username,
                                   @Field("password") String password);
+
+    @FormUrlEncoded
+    @POST("students/register/")
+    Single<Parent> signupParent(@Field("name") String name,
+                                @Field("child_code") String childCode,
+                                @Field("username") String username,
+                                @Field("password") String password);
 }

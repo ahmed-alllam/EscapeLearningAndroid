@@ -3,7 +3,6 @@ package com.escapelearning.escapelearning.data.repositories;
 import android.content.Context;
 
 import com.escapelearning.escapelearning.data.db.AppDatabase;
-import com.escapelearning.escapelearning.data.db.dao.ClassroomDao;
 import com.escapelearning.escapelearning.data.db.dao.StudentDao;
 import com.escapelearning.escapelearning.data.models.Student;
 import com.escapelearning.escapelearning.data.network.APIEndpoints;

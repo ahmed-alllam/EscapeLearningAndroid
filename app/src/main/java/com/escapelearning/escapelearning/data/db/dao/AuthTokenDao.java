@@ -2,6 +2,7 @@ package com.escapelearning.escapelearning.data.db.dao;
 
 import androidx.room.Dao;
 import androidx.room.Insert;
+import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 
 import com.escapelearning.escapelearning.data.models.AuthToken;
@@ -12,7 +13,7 @@ import io.reactivex.Single;
 public abstract class AuthTokenDao {
     private static String token = "";
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     public abstract void addAuthToken(AuthToken authToken);
 
     public static String getToken() {

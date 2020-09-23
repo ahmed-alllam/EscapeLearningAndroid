@@ -24,14 +24,11 @@ public class SchoolsArrayAdapter extends ArrayAdapter<Object> {
     @NonNull
     @Override
     public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-        System.out.println("ahmed in get view");
-
         if (convertView == null)
             convertView = layoutInflater.inflate(android.R.layout.simple_list_item_1, parent, false);
 
         School school = (School) getItem(position);
 
-        System.out.println("ahmed + " + school);
         TextView textView = (TextView) convertView;
 
         if (school != null)
